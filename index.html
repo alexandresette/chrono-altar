@@ -1382,7 +1382,10 @@ updateActiveDisplay();
 updateControls();
 
 // Send idle state on load
-setTimeout(() => broadcast({ mode: 'idle' }), 500);
+setTimeout(() => broadcast({ mode: 'idle', water: false }), 500);
+
+// Heartbeat: rebroadcast current state every 2s so timer screen stays in sync
+setInterval(() => { sendState(); }, 2000);
 </script>
 </body>
 </html>

@@ -458,6 +458,7 @@
 
 <div class="water-overlay" id="waterOverlay"></div>
 <div class="water-badge" id="waterBadge">💧 BEBER ÁGUA<span>Pregador — tome água agora</span></div>
+<div id="debugBadge" style="position:fixed;bottom:8px;left:8px;z-index:999;font-size:11px;font-family:monospace;color:rgba(255,255,0,0.5);pointer-events:none;"></div>
 
 <div class="paused-badge" id="pausedBadge">⏸ PAUSADO</div>
 
@@ -553,6 +554,8 @@ function render(state) {
   // Water reminder
   const waterOverlay = document.getElementById('waterOverlay');
   const waterBadge   = document.getElementById('waterBadge');
+  const debugBadge   = document.getElementById('debugBadge');
+  if (debugBadge) debugBadge.textContent = `ch:${CHANNEL_NAME} water:${data.water} mode:${data.mode} t:${Date.now()%10000}`;
   if (data.water) {
     waterOverlay.classList.add('visible');
     waterBadge.classList.add('visible');
@@ -565,12 +568,19 @@ function render(state) {
 // ── BROADCAST CHANNEL ──
 try {
   channel = new BroadcastChannel(CHANNEL_NAME);
-  channel.onmessage = (e) => render(e.data);
+  channel.onmessage = (e) => { render(e.data); };
 } catch(e) {
   console.error('BroadcastChannel not supported:', e);
 }
 
-// localStorage fallback — polling a cada 500ms
+// storage event — dispara quando OUTRA janela escreve no localStorage
+window.addEventListener('storage', (e) => {
+  if (e.key === 'chrono-altar-state' && e.newValue) {
+    try { render(JSON.parse(e.newValue)); } catch(err) {}
+  }
+});
+
+// localStorage polling — fallback caso storage event não dispare
 let lastStateStr = '';
 setInterval(() => {
   try {
@@ -580,7 +590,7 @@ setInterval(() => {
       render(JSON.parse(raw));
     }
   } catch(e) {}
-}, 500);
+}, 300);
 
 // ── FULLSCREEN ON F11 OR DOUBLE CLICK ──
 document.addEventListener('dblclick', () => {

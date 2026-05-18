@@ -1346,7 +1346,7 @@ function playBeep() {
 
 // ── OPEN TIMER ──
 function openTimerWindow() {
-  const url = 'timer.html';
+  const url = 'timer.html?v=' + Date.now();
   const w = window.open(url, 'chrono-altar-timer', 'width=1280,height=720');
   if (w) {
     showToast("Timer aberto! Arraste para o 2º monitor e pressione F11.");

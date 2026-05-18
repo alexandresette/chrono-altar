@@ -1006,6 +1006,8 @@ const channel = new BroadcastChannel(CHANNEL_NAME);
 
 function broadcast(state) {
   channel.postMessage(state);
+  // localStorage fallback para janelas separadas
+  try { localStorage.setItem('chrono-altar-state', JSON.stringify(state)); } catch(e) {}
 }
 
 function sendState() {

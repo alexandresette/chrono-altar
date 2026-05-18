@@ -570,6 +570,18 @@ try {
   console.error('BroadcastChannel not supported:', e);
 }
 
+// localStorage fallback — polling a cada 500ms
+let lastStateStr = '';
+setInterval(() => {
+  try {
+    const raw = localStorage.getItem('chrono-altar-state');
+    if (raw && raw !== lastStateStr) {
+      lastStateStr = raw;
+      render(JSON.parse(raw));
+    }
+  } catch(e) {}
+}, 500);
+
 // ── FULLSCREEN ON F11 OR DOUBLE CLICK ──
 document.addEventListener('dblclick', () => {
   if (!document.fullscreenElement) {

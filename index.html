@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chrono Altar — Cronômetro Litúrgico</title>
+<meta name="description" content="Cronômetro litúrgico para cultos — painel de controle + tela do altar. Igreja Lagoinha Valinhos.">
+<meta name="theme-color" content="#c8972a">
+
+<!-- Favicons -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png">
+
+<!-- Open Graph / Social Preview -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chrono Altar — Cronômetro Litúrgico">
+<meta property="og:description" content="Cronômetro litúrgico para cultos — painel de controle + tela do altar. Igreja Lagoinha Valinhos.">
+<meta property="og:image" content="social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Chrono Altar — Cronômetro Litúrgico">
+<meta name="twitter:description" content="Cronômetro litúrgico para cultos — painel de controle + tela do altar. Igreja Lagoinha Valinhos.">
+<meta name="twitter:image" content="social-preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --surface2: #141b22;
+    --border: #1e2a35;
+    --border-bright: #2a3d50;
+    --text: #c8d8e8;
+    --text-dim: #5a7a94;
+    --text-dimmer: #2e4558;
+    --accent: #c8972a;
+    --accent-glow: #f5c842;
+    --accent-dim: #7a5b18;
+    --active: #1a6b4a;
+    --active-border: #2adf8a;
+    --active-glow: rgba(42, 223, 138, 0.15);
+    --danger: #8b2020;
+    --danger-border: #e03030;
+    --pause-color: #3a6b9a;
+    --pause-border: #5ab0f0;
+    --gold: #c8972a;
+    --font-display: 'Oswald', sans-serif;
+    --font-ui: 'Rajdhani', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,151,42,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,151,42,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 20px rgba(0,0,0,0.5);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: -1px;
+    box-shadow: 0 0 12px rgba(200,151,42,0.3);
+  }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .logo-text span {
+    color: var(--accent);
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .verse-footer {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.5px;
+    text-align: center;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 5;
+  }
+
+  .verse-footer span {
+    color: var(--accent-dim);
+    font-weight: 600;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid var(--border-bright);
+    background: var(--surface2);
+    color: var(--text-dim);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+    background: var(--border);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0700;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-glow);
+    border-color: var(--accent-glow);
+    box-shadow: 0 0 16px rgba(200,151,42,0.4);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-dim);
+    padding: 8px 10px;
+  }
+
+  .btn-ghost:hover {
+    background: var(--surface2);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    border-color: var(--danger);
+    color: #ff6666;
+  }
+
+  .btn-danger:hover {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(224,48,48,0.3);
+  }
+
+  .btn-open-timer {
+    background: linear-gradient(135deg, #1a3a5c, #0e2035);
+    border-color: var(--pause-border);
+    color: var(--pause-border);
+    font-size: 12px;
+  }
+
+  .btn-open-timer:hover {
+    background: var(--pause-border);
+    color: #001428;
+    box-shadow: 0 0 14px rgba(90,176,240,0.4);
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 28px;
+    background: rgba(14,19,24,0.8);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dimmer);
+    flex-shrink: 0;
+  }
+
+  .status-dot.active {
+    background: var(--active-border);
+    box-shadow: 0 0 8px var(--active-border);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .status-dot.paused {
+    background: var(--pause-border);
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .status-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .status-value {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .status-timer {
+    color: var(--accent-glow);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  .status-timer.negative {
+    color: #ff4444;
+  }
+
+  /* ── LAYOUT ── */
+  .main-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    height: calc(100vh - 100px);
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .liturgy-panel {
+    padding: 24px 28px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+
+  .liturgy-panel::-webkit-scrollbar { width: 4px; }
+  .liturgy-panel::-webkit-scrollbar-track { background: transparent; }
+  .liturgy-panel::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── LITURGY ITEMS ── */
+  .liturgy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .liturgy-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .liturgy-item:hover {
+    border-color: var(--border-bright);
+    background: var(--surface2);
+  }
+
+  .liturgy-item.active {
+    background: rgba(26,107,74,0.15);
+    border-color: var(--active-border);
+    box-shadow: 0 0 20px var(--active-glow), inset 0 0 20px var(--active-glow);
+  }
+
+  .liturgy-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--active-border);
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 0 8px var(--active-border);
+  }
+
+  .liturgy-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  .liturgy-item.drag-over {
+    border-color: var(--accent);
+    background: rgba(200,151,42,0.08);
+  }
+
+  .item-drag-handle {
+    cursor: grab;
+    color: var(--text-dimmer);
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 2px 3px;
+  }
+
+  .item-drag-handle:hover { color: var(--text-dim); }
+  .item-drag-handle:active { cursor: grabbing; }
+
+  .drag-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    display: block;
+  }
+
+  .drag-dots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+  }
+
+  .item-index {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dimmer);
+    width: 20px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .active .item-index {
+    color: var(--active-border);
+  }
+
+  .item-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .item-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex: 1;
+    cursor: pointer;
+    transition: color 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .active .item-name { color: var(--active-border); }
+
+  .item-name:hover { color: var(--accent); }
+
+  .item-name-input {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--accent);
+    outline: none;
+    flex: 1;
+    width: 100%;
+    padding: 0;
+  }
+
+  .item-time {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .item-time:hover {
+    border-color: var(--border-bright);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .active .item-time { color: var(--active-border); }
+
+  .item-time-input {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--accent);
+    outline: none;
+    width: 60px;
+    text-align: right;
+  }
+
+  .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .item-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .item-btn:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .item-btn.play:hover {
+    border-color: var(--active-border);
+    color: var(--active-border);
+    background: rgba(42,223,138,0.1);
+    box-shadow: 0 0 8px rgba(42,223,138,0.2);
+  }
+
+  .item-btn.delete:hover {
+    border-color: var(--danger-border);
+    color: #ff6666;
+    background: rgba(139,32,32,0.2);
+  }
+
+  /* ── ADD ITEM ── */
+  .add-item-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .add-name-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 14px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    letter-spacing: 0.5px;
+    transition: border-color 0.15s;
+  }
+
+  .add-name-input:focus { border-color: var(--accent); }
+  .add-name-input::placeholder { color: var(--text-dimmer); }
+
+  .add-time-input {
+    width: 80px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.15s;
+  }
+
+  .add-time-input:focus { border-color: var(--accent); }
+
+  /* ── RIGHT PANEL ── */
+  .control-panel {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+
+  .control-panel::-webkit-scrollbar { width: 4px; }
+  .control-panel::-webkit-scrollbar-track { background: transparent; }
+  .control-panel::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .control-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .control-section-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .control-btn-large {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    justify-content: center;
+    border-radius: 5px;
+  }
+
+  .control-btn-large.active-ctrl {
+    background: rgba(42,223,138,0.1);
+    border-color: var(--active-border);
+    color: var(--active-border);
+    box-shadow: 0 0 16px rgba(42,223,138,0.2);
+  }
+
+  .control-btn-large.paused-ctrl {
+    background: rgba(90,176,240,0.1);
+    border-color: var(--pause-border);
+    color: var(--pause-border);
+  }
+
+  /* ── ACTIVE DISPLAY ── */
+  .active-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .active-display-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .active-display-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .active-display-time {
+    font-family: var(--font-mono);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent-glow);
+    letter-spacing: 2px;
+  }
+
+  .active-display-time.negative {
+    color: #ff4444;
+  }
+
+  .active-display-time.warning {
+    color: #ff9922;
+    animation: time-warning 0.5s ease-in-out infinite alternate;
+  }
+
+  /* ── WATER BUTTON ── */
+  .btn-water {
+    width: 100%;
+    padding: 14px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    justify-content: center;
+    border-radius: 5px;
+    margin-top: 4px;
+    background: rgba(56, 182, 255, 0.08);
+    border: 1px solid rgba(56, 182, 255, 0.3);
+    color: rgba(56, 182, 255, 0.6);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-water:hover {
+    background: rgba(56, 182, 255, 0.14);
+    border-color: rgba(56, 182, 255, 0.5);
+    color: rgba(56, 182, 255, 0.9);
+  }
+  .btn-water.water-active {
+    background: rgba(56, 182, 255, 0.18);
+    border-color: #38b6ff;
+    color: #38b6ff;
+    box-shadow: 0 0 18px rgba(56, 182, 255, 0.35);
+    animation: water-pulse 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes water-pulse {
+    from { box-shadow: 0 0 10px rgba(56,182,255,0.25); border-color: rgba(56,182,255,0.7); }
+    to   { box-shadow: 0 0 28px rgba(56,182,255,0.6); border-color: #38b6ff; }
+  }
+
+  @keyframes time-warning {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+  }
+
+  /* ── KEYBOARD SHORTCUTS ── */
+  .shortcuts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .shortcut-key {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 2px 7px;
+    color: var(--text-dim);
+  }
+
+  .shortcut-desc {
+    color: var(--text-dimmer);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── PROGRESS ── */
+  .total-progress {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+  }
+
+  .progress-bar-outer {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dimmer);
+    margin-top: 6px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SEPARATOR LINE ── */
+  .sep {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">CA</div>
+    <div>
+      <div class="logo-text">Chrono <span>Altar</span></div>
+      <div class="logo-sub">Igreja Lagoinha Valinhos — Mesa de Controle</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-open-timer" onclick="openTimerWindow()">
+      📺 Abrir Tela do Timer
+    </button>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <span class="status-label">Status:</span>
+  <span class="status-value" id="statusLabel">Aguardando</span>
+  <span class="status-label" style="margin-left:20px;">Etapa:</span>
+  <span class="status-value" id="statusStep">—</span>
+  <span class="status-timer" id="statusTimer">--:--</span>
+</div>
+
+<div class="main-layout">
+  <!-- LEFT: Liturgy List -->
+  <div class="liturgy-panel">
+    <div class="panel-header">
+      <span class="panel-title">Liturgia</span>
+      <button class="btn" onclick="resetLiturgy()" style="font-size:11px;padding:5px 12px;">↺ Restaurar Padrão</button>
+    </div>
+
+    <div class="liturgy-list" id="liturgyList"></div>
+
+    <div class="add-item-row">
+      <input class="add-name-input" id="newName" placeholder="Nova categoria..." maxlength="40">
+      <input class="add-time-input" id="newTime" placeholder="min" type="number" min="1" max="180" value="10">
+      <button class="btn btn-primary" onclick="addItem()" style="padding:8px 14px;">+ Add</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Control Panel -->
+  <div class="control-panel">
+
+    <div class="control-section">
+      <div class="control-section-title">Etapa Ativa</div>
+      <div class="active-display">
+        <div class="active-display-label">Agora em cena</div>
+        <div class="active-display-name" id="activeDisplayName">—</div>
+        <div class="active-display-time" id="activeDisplayTime">--:--</div>
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="control-section-title">Controles</div>
+      <button class="btn control-btn-large" id="btnPause" onclick="togglePause()" disabled>
+        ⏸ Pausar
+      </button>
+      <button class="btn control-btn-large" id="btnNext" onclick="nextStep()" disabled>
+        ⏭ Próxima Etapa
+      </button>
+      <button class="btn control-btn-large btn-danger" id="btnStop" onclick="stopTimer()" disabled>
+        ⏹ Encerrar
+      </button>
+      <button class="btn-water" id="btnWater" onclick="toggleWater()">
+        💧 Beber Água
+      </button>
+    </div>
+
+    <div class="control-section">
+      <div class="control-section-title">Progresso Total</div>
+      <div class="total-progress">
+        <div class="progress-label" style="margin-bottom:0">
+          <span id="progStep">—</span>
+          <span id="progPercent">0%</span>
+        </div>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progElapsed">0min decorridos</span>
+          <span id="progTotal">0min total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="control-section-title">Atalhos</div>
+      <div class="shortcuts-list">
+        <div class="shortcut-row">
+          <span class="shortcut-key">Espaço</span>
+          <span class="shortcut-desc">Pausar / Retomar</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">→</span>
+          <span class="shortcut-desc">Próxima etapa</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">Esc</span>
+          <span class="shortcut-desc">Encerrar</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="verse-footer">"Tudo o que fizerem, façam de todo o coração, como para o Senhor" &nbsp;—&nbsp; <span>Colossenses 3:23-24</span></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DEFAULT LITURGY ──
+const DEFAULT_LITURGY = [
+  { name: "Louvor", minutes: 30 },
+  { name: "Dízimos e Ofertas", minutes: 10 },
+  { name: "Avisos", minutes: 5 },
+  { name: "Palavra", minutes: 40 },
+  { name: "Louvor Final", minutes: 5 },
+];
+
+const STORAGE_KEY = "chrono-altar-liturgia";
+const CHANNEL_NAME = "chrono-altar";
+
+// ── STATE ──
+let liturgy = [];
+let activeIndex = -1;
+let secondsLeft = 0;
+let paused = false;
+let timerInterval = null;
+let dragSrcIndex = null;
+let audioCtx = null;
+let elapsedSeconds = 0;
+let totalSeconds = 0;
+let editingNameIndex = -1;
+let editingTimeIndex = -1;
+
+// ── WATER REMINDER ──
+let waterActive = false;
+
+function toggleWater() {
+  waterActive = !waterActive;
+  const btn = document.getElementById('btnWater');
+  if (waterActive) {
+    btn.classList.add('water-active');
+    btn.textContent = '💧 Beber Água  ✓ Ativo';
+  } else {
+    btn.classList.remove('water-active');
+    btn.textContent = '💧 Beber Água';
+  }
+  // broadcast current state so timer picks it up immediately
+  sendStateWithWater();
+}
+
+function sendStateWithWater() {
+  const state = activeIndex === -1 ? { mode: 'idle', water: waterActive } : {
+    mode: paused ? 'paused' : (secondsLeft < 0 ? 'overtime' : 'active'),
+    name: liturgy[activeIndex]?.name || '',
+    secondsLeft,
+    totalSeconds: liturgy[activeIndex]?.minutes * 60 || 0,
+    elapsed: elapsedSeconds,
+    activeIndex,
+    totalSteps: liturgy.length,
+    water: waterActive,
+  };
+  broadcast(state);
+}
+
+
+const channel = new BroadcastChannel(CHANNEL_NAME);
+
+function broadcast(state) {
+  channel.postMessage(state);
+}
+
+function sendState() {
+  const state = activeIndex === -1 ? { mode: 'idle', water: waterActive } : {
+    mode: paused ? 'paused' : (secondsLeft < 0 ? 'overtime' : 'active'),
+    name: liturgy[activeIndex]?.name || '',
+    secondsLeft,
+    totalSeconds: liturgy[activeIndex]?.minutes * 60 || 0,
+    elapsed: elapsedSeconds,
+    activeIndex,
+    totalSteps: liturgy.length,
+    water: waterActive,
+  };
+  broadcast(state);
+}
+
+// ── STORAGE ──
+function saveLiturgy() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(liturgy));
+}
+
+function loadLiturgy() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  liturgy = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_LITURGY));
+  renderList();
+}
+
+function resetLiturgy() {
+  if (activeIndex !== -1) return showToast("Encerre o timer antes de restaurar.");
+  liturgy = JSON.parse(JSON.stringify(DEFAULT_LITURGY));
+  saveLiturgy();
+  renderList();
+  showToast("Liturgia restaurada ao padrão.");
+}
+
+// ── RENDER ──
+function renderList() {
+  const list = document.getElementById('liturgyList');
+  list.innerHTML = '';
+
+  liturgy.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'liturgy-item' + (i === activeIndex ? ' active' : '');
+    row.draggable = true;
+    row.dataset.index = i;
+
+    row.addEventListener('dragstart', e => {
+      dragSrcIndex = i;
+      setTimeout(() => row.classList.add('dragging'), 0);
+    });
+    row.addEventListener('dragend', e => {
+      row.classList.remove('dragging');
+      document.querySelectorAll('.liturgy-item').forEach(r => r.classList.remove('drag-over'));
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.liturgy-item').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcIndex !== null && dragSrcIndex !== i) {
+        reorder(dragSrcIndex, i);
+      }
+      dragSrcIndex = null;
+    });
+
+    const handleDiv = document.createElement('div');
+    handleDiv.className = 'item-drag-handle';
+    handleDiv.innerHTML = `<div class="drag-dots"><div class="drag-dot"></div><div class="drag-dot"></div><div class="drag-dot"></div><div class="drag-dot"></div><div class="drag-dot"></div><div class="drag-dot"></div></div>`;
+
+    const indexSpan = document.createElement('span');
+    indexSpan.className = 'item-index';
+    indexSpan.textContent = String(i + 1).padStart(2, '0');
+
+    const content = document.createElement('div');
+    content.className = 'item-content';
+
+    // Name
+    if (editingNameIndex === i) {
+      const inp = document.createElement('input');
+      inp.className = 'item-name-input';
+      inp.value = item.name;
+      inp.style.flex = '1';
+      inp.addEventListener('blur', () => { liturgy[i].name = inp.value || item.name; editingNameIndex = -1; saveLiturgy(); renderList(); });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') inp.blur(); });
+      content.appendChild(inp);
+      setTimeout(() => inp.focus(), 0);
+    } else {
+      const nameEl = document.createElement('span');
+      nameEl.className = 'item-name';
+      nameEl.textContent = item.name;
+      nameEl.title = 'Clique para editar';
+      nameEl.addEventListener('click', () => { editingNameIndex = i; editingTimeIndex = -1; renderList(); });
+      content.appendChild(nameEl);
+    }
+
+    // Time
+    if (editingTimeIndex === i) {
+      const inp = document.createElement('input');
+      inp.className = 'item-time-input';
+      inp.type = 'number';
+      inp.value = item.minutes;
+      inp.min = 1; inp.max = 180;
+      inp.addEventListener('blur', () => {
+        const v = parseInt(inp.value);
+        if (!isNaN(v) && v > 0) liturgy[i].minutes = v;
+        editingTimeIndex = -1; saveLiturgy(); renderList();
+      });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') inp.blur(); });
+      content.appendChild(inp);
+      setTimeout(() => inp.focus(), 0);
+    } else {
+      const timeEl = document.createElement('span');
+      timeEl.className = 'item-time';
+      timeEl.textContent = item.minutes + 'min';
+      timeEl.title = 'Clique para editar';
+      timeEl.addEventListener('click', () => { editingTimeIndex = i; editingNameIndex = -1; renderList(); });
+      content.appendChild(timeEl);
+    }
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'item-actions';
+
+    const playBtn = document.createElement('button');
+    playBtn.className = 'item-btn play';
+    playBtn.title = 'Iniciar esta etapa';
+    playBtn.innerHTML = '▶';
+    playBtn.addEventListener('click', () => startStep(i));
+    actions.appendChild(playBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'item-btn delete';
+    delBtn.title = 'Remover';
+    delBtn.innerHTML = '✕';
+    delBtn.addEventListener('click', () => {
+      if (i === activeIndex) return showToast("Encerre o timer antes de remover.");
+      liturgy.splice(i, 1);
+      if (activeIndex > i) activeIndex--;
+      saveLiturgy(); renderList();
+    });
+    actions.appendChild(delBtn);
+
+    row.appendChild(handleDiv);
+    row.appendChild(indexSpan);
+    row.appendChild(content);
+    row.appendChild(actions);
+    list.appendChild(row);
+  });
+
+  updateProgress();
+}
+
+function reorder(from, to) {
+  if (activeIndex !== -1) { showToast("Encerre o timer antes de reordenar."); return; }
+  const item = liturgy.splice(from, 1)[0];
+  liturgy.splice(to, 0, item);
+  saveLiturgy();
+  renderList();
+}
+
+// ── TIMER LOGIC ──
+function startStep(index) {
+  if (timerInterval) clearInterval(timerInterval);
+  activeIndex = index;
+  secondsLeft = liturgy[index].minutes * 60;
+  elapsedSeconds = 0;
+  totalSeconds = secondsLeft;
+  paused = false;
+  startTicking();
+  renderList();
+  updateControls();
+  sendState();
+}
+
+function startTicking() {
+  timerInterval = setInterval(() => {
+    if (!paused) {
+      secondsLeft--;
+      elapsedSeconds++;
+      if (secondsLeft === 0) playBeep();
+      updateStatusBar();
+      updateActiveDisplay();
+      updateProgress();
+      sendState();
+    }
+  }, 1000);
+}
+
+function togglePause() {
+  paused = !paused;
+  updateControls();
+  sendState();
+  updateStatusBar();
+}
+
+function nextStep() {
+  if (activeIndex < liturgy.length - 1) {
+    startStep(activeIndex + 1);
+  } else {
+    stopTimer();
+    showToast("Liturgia concluída! Parabéns.");
+  }
+}
+
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  activeIndex = -1;
+  secondsLeft = 0;
+  elapsedSeconds = 0;
+  paused = false;
+  renderList();
+  updateControls();
+  updateStatusBar();
+  updateActiveDisplay();
+  updateProgress();
+  broadcast({ mode: 'idle' });
+}
+
+// ── UI UPDATES ──
+function fmtTime(s) {
+  const neg = s < 0;
+  const abs = Math.abs(s);
+  const m = Math.floor(abs / 60).toString().padStart(2, '0');
+  const sec = (abs % 60).toString().padStart(2, '0');
+  return (neg ? '-' : '') + m + ':' + sec;
+}
+
+function updateStatusBar() {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  const step = document.getElementById('statusStep');
+  const timer = document.getElementById('statusTimer');
+
+  dot.className = 'status-dot';
+  if (activeIndex === -1) {
+    label.textContent = 'Aguardando';
+    step.textContent = '—';
+    timer.textContent = '--:--';
+    timer.className = 'status-timer';
+  } else if (paused) {
+    dot.classList.add('paused');
+    label.textContent = 'PAUSADO';
+    step.textContent = liturgy[activeIndex]?.name || '';
+    timer.textContent = fmtTime(secondsLeft);
+    timer.className = 'status-timer' + (secondsLeft < 0 ? ' negative' : '');
+  } else {
+    dot.classList.add('active');
+    label.textContent = 'EM CURSO';
+    step.textContent = liturgy[activeIndex]?.name || '';
+    timer.textContent = fmtTime(secondsLeft);
+    timer.className = 'status-timer' + (secondsLeft < 0 ? ' negative' : '');
+  }
+}
+
+function updateActiveDisplay() {
+  const name = document.getElementById('activeDisplayName');
+  const time = document.getElementById('activeDisplayTime');
+
+  if (activeIndex === -1) {
+    name.textContent = '—';
+    time.textContent = '--:--';
+    time.className = 'active-display-time';
+    return;
+  }
+
+  name.textContent = liturgy[activeIndex]?.name || '';
+  time.textContent = fmtTime(secondsLeft);
+  time.className = 'active-display-time' +
+    (secondsLeft < 0 ? ' negative' : (secondsLeft <= 60 ? ' warning' : ''));
+}
+
+function updateControls() {
+  const isActive = activeIndex !== -1;
+  const btnPause = document.getElementById('btnPause');
+  const btnNext = document.getElementById('btnNext');
+  const btnStop = document.getElementById('btnStop');
+
+  btnPause.disabled = !isActive;
+  btnNext.disabled = !isActive;
+  btnStop.disabled = !isActive;
+
+  if (paused) {
+    btnPause.textContent = '▶ Retomar';
+    btnPause.className = 'btn control-btn-large paused-ctrl';
+  } else {
+    btnPause.textContent = '⏸ Pausar';
+    btnPause.className = 'btn control-btn-large' + (isActive ? ' active-ctrl' : '');
+  }
+}
+
+function updateProgress() {
+  const totalMin = liturgy.reduce((s, i) => s + i.minutes, 0);
+  const elapsedMin = Math.floor(elapsedSeconds / 60);
+  const pct = totalMin > 0 ? Math.min(100, Math.round(elapsedMin / totalMin * 100)) : 0;
+
+  document.getElementById('progStep').textContent =
+    activeIndex !== -1 ? `Etapa ${activeIndex + 1} de ${liturgy.length}` : '—';
+  document.getElementById('progPercent').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progElapsed').textContent = elapsedMin + 'min decorridos';
+  document.getElementById('progTotal').textContent = totalMin + 'min total';
+}
+
+// ── ADD ITEM ──
+function addItem() {
+  const name = document.getElementById('newName').value.trim();
+  const time = parseInt(document.getElementById('newTime').value);
+  if (!name) return showToast("Digite um nome para a categoria.");
+  if (!time || time < 1) return showToast("Tempo inválido.");
+  liturgy.push({ name, minutes: time });
+  document.getElementById('newName').value = '';
+  document.getElementById('newTime').value = '10';
+  saveLiturgy();
+  renderList();
+}
+
+// ── AUDIO BEEP ──
+function playBeep() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 1.2);
+  } catch(e) {}
+}
+
+// ── OPEN TIMER ──
+function openTimerWindow() {
+  const url = 'timer.html';
+  const w = window.open(url, 'chrono-altar-timer', 'width=1280,height=720');
+  if (w) {
+    showToast("Timer aberto! Arraste para o 2º monitor e pressione F11.");
+  } else {
+    showToast("Pop-up bloqueado. Permita pop-ups e tente novamente.");
+  }
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); if (activeIndex !== -1) togglePause(); }
+  if (e.code === 'ArrowRight') { e.preventDefault(); if (activeIndex !== -1) nextStep(); }
+  if (e.code === 'Escape') { e.preventDefault(); if (activeIndex !== -1) stopTimer(); }
+});
+
+// ── ADD ITEM ENTER ──
+document.getElementById('newName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addItem();
+});
+
+// ── INIT ──
+loadLiturgy();
+updateStatusBar();
+updateActiveDisplay();
+updateControls();
+
+// Send idle state on load
+setTimeout(() => broadcast({ mode: 'idle' }), 500);
+</script>
+</body>
+</html>

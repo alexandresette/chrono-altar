@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chrono Altar — Tela do Altar</title>
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;600;700&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font-timer: 'Bebas Neue', sans-serif;
+    --font-title: 'Rajdhani', sans-serif;
+    --font-ui: 'Oswald', sans-serif;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a0a;
+    font-family: var(--font-title);
+    user-select: none;
+    cursor: default;
+  }
+
+  /* ── PROGRESS BAR ── */
+  #progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #c8972a, #f5c842);
+    transition: width 1s linear;
+    z-index: 100;
+    box-shadow: 0 0 8px rgba(245, 200, 66, 0.6);
+  }
+
+  #progressBar.overtime {
+    background: linear-gradient(90deg, #8b0000, #ff2222);
+    box-shadow: 0 0 8px rgba(255, 34, 34, 0.6);
+    width: 100% !important;
+  }
+
+  /* ── BACKGROUND LAYER ── */
+  #bg {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    transition: background 0.5s ease;
+    z-index: 0;
+  }
+
+  #bg.overtime {
+    animation: bg-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes bg-pulse {
+    0%, 100% { background: #0a0a0a; }
+    50% { background: #1a0000; }
+  }
+
+  /* ── MAIN SCREEN ── */
+  #screen {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── IDLE STATE ── */
+  #idleView {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    opacity: 0;
+    animation: fade-in 1s ease 0.3s forwards;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .idle-cross {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    opacity: 0.3;
+    margin-bottom: 12px;
+  }
+
+  .idle-cross::before,
+  .idle-cross::after {
+    content: '';
+    position: absolute;
+    background: #ffffff;
+    border-radius: 2px;
+  }
+
+  .idle-cross::before {
+    width: 6px; height: 64px;
+    left: 50%; top: 0;
+    transform: translateX(-50%);
+  }
+
+  .idle-cross::after {
+    width: 40px; height: 6px;
+    left: 50%; top: 30%;
+    transform: translateX(-50%);
+  }
+
+  .idle-logo {
+    font-family: var(--font-ui);
+    font-size: 6vw;
+    font-weight: 600;
+    letter-spacing: 0.8vw;
+    color: rgba(255,255,255,0.15);
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .idle-logo span {
+    color: rgba(200,151,42,0.3);
+  }
+
+  .idle-sub {
+    font-family: var(--font-title);
+    font-size: 1.2vw;
+    letter-spacing: 0.5vw;
+    color: rgba(255,255,255,0.12);
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .idle-waiting {
+    font-family: var(--font-title);
+    font-size: 1vw;
+    letter-spacing: 0.3vw;
+    color: rgba(255,255,255,0.08);
+    text-transform: uppercase;
+    margin-top: 40px;
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* ── ACTIVE STATE ── */
+  #activeView {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 40px;
+    gap: 0;
+  }
+
+  .category-title {
+    font-family: var(--font-title);
+    font-size: clamp(28px, 4vw, 72px);
+    font-weight: 700;
+    letter-spacing: 0.5vw;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 2vw;
+    transition: color 0.5s ease;
+  }
+
+  .category-title.overtime {
+    color: #ff2222;
+    animation: title-blink 1s step-end infinite;
+  }
+
+  @keyframes title-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .timer-display {
+    font-family: var(--font-timer);
+    font-size: clamp(80px, 42vw, 600px);
+    line-height: 0.85;
+    color: #FFD700;
+    text-align: center;
+    letter-spacing: -0.02em;
+    transition: color 0.5s ease;
+    text-shadow: 0 0 80px rgba(255, 215, 0, 0.2);
+  }
+
+  .timer-display.overtime {
+    color: #ff2222;
+    text-shadow: 0 0 60px rgba(255,34,34,0.4);
+    animation: timer-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes timer-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  /* ── WATER OVERLAY ── */
+  .water-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .water-overlay.visible {
+    display: block;
+  }
+
+  /* Pulsing border frame */
+  .water-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 6px solid rgba(56, 182, 255, 0.0);
+    animation: water-border 2s ease-in-out infinite;
+  }
+  @keyframes water-border {
+    0%, 100% { border-color: rgba(56,182,255,0.0); box-shadow: inset 0 0 0 rgba(56,182,255,0); }
+    50%       { border-color: rgba(56,182,255,0.55); box-shadow: inset 0 0 80px rgba(56,182,255,0.08); }
+  }
+
+  /* Floating water badge */
+  .water-badge {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 110px);
+    letter-spacing: 0.12em;
+    color: rgba(56, 182, 255, 0.92);
+    text-shadow:
+      0 0 40px rgba(56,182,255,0.8),
+      0 0 80px rgba(56,182,255,0.4);
+    animation: water-flash 1.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 51;
+    display: none;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .water-badge.visible {
+    display: block;
+  }
+  .water-badge span {
+    display: block;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 2.2vw, 36px);
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    color: rgba(56,182,255,0.55);
+    text-shadow: none;
+    margin-top: 0.2em;
+  }
+  @keyframes water-flash {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.97); }
+    40%, 60%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  /* ── PAUSED INDICATOR ── */
+  .paused-badge {
+    display: none;
+    position: fixed;
+    bottom: 5vh;
+    right: 4vw;
+    font-family: var(--font-title);
+    font-size: clamp(12px, 1.4vw, 24px);
+    letter-spacing: 0.3vw;
+    color: rgba(90,176,240,0.6);
+    text-transform: uppercase;
+    animation: blink-pause 1s step-end infinite;
+  }
+
+  @keyframes blink-pause {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ── STEP INDICATOR ── */
+  .step-dots {
+    display: flex;
+    gap: 10px;
+    margin-top: 4vw;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
+  }
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .step-dot.done {
+    background: rgba(42,223,138,0.4);
+    border-color: rgba(42,223,138,0.6);
+  }
+
+  .step-dot.current {
+    background: #FFD700;
+    border-color: #FFD700;
+    box-shadow: 0 0 10px rgba(255,215,0,0.6);
+    transform: scale(1.3);
+  }
+
+  .step-dot.current.overtime {
+    background: #ff2222;
+    border-color: #ff2222;
+    box-shadow: 0 0 10px rgba(255,34,34,0.6);
+  }
+
+  /* ── INSTRUCTIONS OVERLAY ── */
+  #instructionsOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fade-in 0.4s ease;
+  }
+
+  .instructions-box {
+    border: 1px solid rgba(200,151,42,0.4);
+    background: rgba(10,10,10,0.95);
+    border-radius: 8px;
+    padding: 48px 56px;
+    text-align: center;
+    max-width: 520px;
+  }
+
+  .instructions-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .instructions-title {
+    font-family: var(--font-ui);
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #c8972a;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .instructions-text {
+    font-family: var(--font-title);
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+    margin-bottom: 32px;
+  }
+
+  .instructions-text strong {
+    color: rgba(255,255,255,0.9);
+  }
+
+  .instructions-btn {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    background: #c8972a;
+    border: none;
+    color: #0a0700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .instructions-btn:hover {
+    background: #f5c842;
+    box-shadow: 0 0 20px rgba(245,200,66,0.4);
+  }
+
+  /* Subtle scanlines for TV feel */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 50;
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+<div id="bg"></div>
+
+<!-- Instructions overlay (shown on first open) -->
+<div id="instructionsOverlay">
+  <div class="instructions-box">
+    <span class="instructions-icon">📺</span>
+    <div class="instructions-title">Chrono Altar</div>
+    <p class="instructions-text">
+      Esta janela é a <strong>Tela do Timer</strong>.<br><br>
+      Arraste-a para o <strong>segundo monitor</strong> (TV do altar)<br>
+      e pressione <strong>F11</strong> para tela cheia.<br><br>
+      Os controles ficam na janela de controle.
+    </p>
+    <button class="instructions-btn" onclick="dismissInstructions()">Entendido — Iniciar</button>
+  </div>
+</div>
+
+<div id="screen">
+  <!-- IDLE -->
+  <div id="idleView">
+    <div class="idle-cross"></div>
+    <div class="idle-logo">Igreja <span>Lagoinha</span><br>Valinhos</div>
+    <div class="idle-sub">Chrono Altar</div>
+    <div class="idle-waiting">Aguardando início...</div>
+  </div>
+
+  <!-- ACTIVE -->
+  <div id="activeView">
+    <div class="category-title" id="categoryTitle">LOUVOR</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+</div>
+
+<div class="water-overlay" id="waterOverlay"></div>
+<div class="water-badge" id="waterBadge">💧 BEBER ÁGUA<span>Pregador — tome água agora</span></div>
+
+<div class="paused-badge" id="pausedBadge">⏸ PAUSADO</div>
+
+<script>
+const CHANNEL_NAME = "chrono-altar";
+let channel;
+let currentState = { mode: 'idle' };
+let liturgyLength = 0;
+
+function dismissInstructions() {
+  document.getElementById('instructionsOverlay').style.display = 'none';
+}
+
+function fmtTime(s) {
+  const neg = s < 0;
+  const abs = Math.abs(s);
+  const m = Math.floor(abs / 60).toString().padStart(2, '0');
+  const sec = (abs % 60).toString().padStart(2, '0');
+  return (neg ? '-' : '') + m + ':' + sec;
+}
+
+function render(state) {
+  currentState = state;
+  const idleView = document.getElementById('idleView');
+  const activeView = document.getElementById('activeView');
+  const bg = document.getElementById('bg');
+  const progressBar = document.getElementById('progressBar');
+  const categoryTitle = document.getElementById('categoryTitle');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const pausedBadge = document.getElementById('pausedBadge');
+
+  if (state.mode === 'idle') {
+    idleView.style.display = 'flex';
+    activeView.style.display = 'none';
+    bg.className = '';
+    progressBar.style.width = '0%';
+    progressBar.className = '';
+    pausedBadge.style.display = 'none';
+    return;
+  }
+
+  idleView.style.display = 'none';
+  activeView.style.display = 'flex';
+
+  const isOvertime = state.mode === 'overtime';
+  const isPaused = state.mode === 'paused';
+
+  // Background
+  bg.className = isOvertime ? 'overtime' : '';
+
+  // Category title
+  categoryTitle.textContent = isOvertime ? 'FINALIZAR' : (state.name || '').toUpperCase();
+  categoryTitle.className = 'category-title' + (isOvertime ? ' overtime' : '');
+
+  // Timer
+  timerDisplay.textContent = fmtTime(state.secondsLeft);
+  timerDisplay.className = 'timer-display' + (isOvertime ? ' overtime' : '');
+
+  // Progress bar
+  if (isOvertime) {
+    progressBar.className = 'overtime';
+    progressBar.style.width = '100%';
+  } else {
+    progressBar.className = '';
+    const total = state.totalSeconds || 1;
+    const elapsed = total - state.secondsLeft;
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    progressBar.style.width = pct + '%';
+  }
+
+  // Step dots — rebuild if liturgy length changed
+  const dots = document.getElementById('stepDots');
+  if (state.activeIndex !== undefined) {
+    const n = state.totalSteps || 0;
+    if (dots.children.length !== n) {
+      dots.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        const d = document.createElement('div');
+        d.className = 'step-dot';
+        dots.appendChild(d);
+      }
+    }
+    Array.from(dots.children).forEach((d, i) => {
+      d.className = 'step-dot' +
+        (i < state.activeIndex ? ' done' : '') +
+        (i === state.activeIndex ? ' current' + (isOvertime ? ' overtime' : '') : '');
+    });
+  }
+
+  // Paused badge
+  pausedBadge.style.display = isPaused ? 'block' : 'none';
+
+  // Water reminder
+  const waterOverlay = document.getElementById('waterOverlay');
+  const waterBadge   = document.getElementById('waterBadge');
+  if (data.water) {
+    waterOverlay.classList.add('visible');
+    waterBadge.classList.add('visible');
+  } else {
+    waterOverlay.classList.remove('visible');
+    waterBadge.classList.remove('visible');
+  }
+}
+
+// ── BROADCAST CHANNEL ──
+try {
+  channel = new BroadcastChannel(CHANNEL_NAME);
+  channel.onmessage = (e) => render(e.data);
+} catch(e) {
+  console.error('BroadcastChannel not supported:', e);
+}
+
+// ── FULLSCREEN ON F11 OR DOUBLE CLICK ──
+document.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+});
+
+// Init idle
+render({ mode: 'idle' });
+</script>
+</body>
+</html>

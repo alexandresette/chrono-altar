@@ -477,7 +477,6 @@
   <span class="water-title">BEBER ÁGUA</span>
   <span class="water-sub">Pregador — tome água agora</span>
 </div>
-<div id="debugBadge" style="position:fixed;bottom:8px;left:8px;z-index:999;font-size:11px;font-family:monospace;color:rgba(255,255,0,0.6);pointer-events:none;">v6 aguardando...</div>
 
 <div class="paused-badge" id="pausedBadge">⏸ PAUSADO</div>
 
@@ -577,8 +576,6 @@ function render(state) {
 function applyWater(on) {
   const waterOverlay = document.getElementById('waterOverlay');
   const waterBadge   = document.getElementById('waterBadge');
-  const debugBadge   = document.getElementById('debugBadge');
-  if (debugBadge) debugBadge.textContent = `v6 water:${on} ${Date.now()%100000}`;
   if (!waterOverlay || !waterBadge) return;
   if (on) {
     waterOverlay.style.display = 'block';

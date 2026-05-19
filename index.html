@@ -659,6 +659,56 @@
     border-radius: 6px;
     padding: 16px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Water overlay no preview do painel */
+  .active-display-water {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 8, 20, 0.82);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: water-bg-pulse-panel 2s ease-in-out infinite;
+    border-radius: 5px;
+  }
+  .active-display-water.visible {
+    display: flex;
+  }
+  @keyframes water-bg-pulse-panel {
+    0%, 100% { background: rgba(0,8,20,0.80); }
+    50%       { background: rgba(0,12,30,0.90); }
+  }
+  .active-display-water .aw-icon {
+    font-size: 28px;
+    animation: water-flash-panel 1.8s ease-in-out infinite;
+    line-height: 1;
+  }
+  .active-display-water .aw-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: #38b6ff;
+    text-shadow: 0 0 12px rgba(56,182,255,0.9);
+    font-weight: 700;
+    margin-top: 6px;
+    animation: water-flash-panel 1.8s ease-in-out infinite;
+  }
+  .active-display-water .aw-sub {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(56,182,255,0.5);
+    margin-top: 4px;
+  }
+  @keyframes water-flash-panel {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 1; }
   }
 
   .active-display-label {
@@ -880,6 +930,11 @@
     <div class="control-section">
       <div class="control-section-title">Etapa Ativa</div>
       <div class="active-display">
+        <div class="active-display-water" id="panelWaterOverlay">
+          <span class="aw-icon">💧</span>
+          <span class="aw-title">BEBER ÁGUA</span>
+          <span class="aw-sub">Aviso ativo na tela</span>
+        </div>
         <div class="active-display-label">Agora em cena</div>
         <div class="active-display-name" id="activeDisplayName">—</div>
         <div class="active-display-time" id="activeDisplayTime">--:--</div>
@@ -976,14 +1031,16 @@ let waterActive = false;
 function toggleWater() {
   waterActive = !waterActive;
   const btn = document.getElementById('btnWater');
+  const panelOverlay = document.getElementById('panelWaterOverlay');
   if (waterActive) {
     btn.classList.add('water-active');
     btn.textContent = '💧 Beber Água  ✓ Ativo';
+    if (panelOverlay) panelOverlay.classList.add('visible');
   } else {
     btn.classList.remove('water-active');
     btn.textContent = '💧 Beber Água';
+    if (panelOverlay) panelOverlay.classList.remove('visible');
   }
-  // broadcast current state so timer picks it up immediately
   sendStateWithWater();
 }
 

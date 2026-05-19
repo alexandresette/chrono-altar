@@ -461,7 +461,7 @@
 
 <div class="water-overlay" id="waterOverlay"></div>
 <div class="water-badge" id="waterBadge">💧 BEBER ÁGUA<span>Pregador — tome água agora</span></div>
-<div id="debugBadge" style="position:fixed;bottom:8px;left:8px;z-index:999;font-size:11px;font-family:monospace;color:rgba(255,255,0,0.6);pointer-events:none;">v5 carregando...</div>
+<div id="debugBadge" style="position:fixed;bottom:8px;left:8px;z-index:999;font-size:11px;font-family:monospace;color:rgba(255,255,0,0.6);pointer-events:none;">v6 aguardando...</div>
 
 <div class="paused-badge" id="pausedBadge">⏸ PAUSADO</div>
 
@@ -607,13 +607,13 @@ document.addEventListener('dblclick', () => {
 // Init idle
 render({ mode: 'idle' });
 
-// ── SELF TEST: lê localStorage imediatamente ao carregar ──
-(function() {
+// ── SELF TEST: lê localStorage após DOM pronto ──
+setTimeout(() => {
   try {
     const raw = localStorage.getItem('chrono-altar-state');
     if (raw) { render(JSON.parse(raw)); }
   } catch(e) {}
-})();
+}, 100);
 </script>
 </body>
 </html>

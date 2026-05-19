@@ -554,17 +554,22 @@ function render(state) {
   // Paused badge
   pausedBadge.style.display = isPaused ? 'block' : 'none';
 
-  // Water reminder
+  // Water reminder — função separada para garantir execução
+  applyWater(data.water);
+}
+
+function applyWater(on) {
   const waterOverlay = document.getElementById('waterOverlay');
   const waterBadge   = document.getElementById('waterBadge');
   const debugBadge   = document.getElementById('debugBadge');
-  if (debugBadge) debugBadge.textContent = `ch:${CHANNEL_NAME} water:${data.water} mode:${data.mode} t:${Date.now()%10000}`;
-  if (data.water) {
-    waterOverlay.classList.add('visible');
-    waterBadge.classList.add('visible');
+  if (debugBadge) debugBadge.textContent = `v6 water:${on} ${Date.now()%100000}`;
+  if (!waterOverlay || !waterBadge) return;
+  if (on) {
+    waterOverlay.style.display = 'block';
+    waterBadge.style.display   = 'block';
   } else {
-    waterOverlay.classList.remove('visible');
-    waterBadge.classList.remove('visible');
+    waterOverlay.style.display = 'none';
+    waterBadge.style.display   = 'none';
   }
 }
 
@@ -607,13 +612,15 @@ document.addEventListener('dblclick', () => {
 // Init idle
 render({ mode: 'idle' });
 
-// ── SELF TEST: lê localStorage após DOM pronto ──
-setTimeout(() => {
+// ── SELF TEST + polling: lê localStorage a cada 300ms ──
+setInterval(() => {
   try {
     const raw = localStorage.getItem('chrono-altar-state');
-    if (raw) { render(JSON.parse(raw)); }
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    applyWater(state.water === true);
   } catch(e) {}
-}, 100);
+}, 300);
 </script>
 </body>
 </html>

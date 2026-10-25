@@ -985,14 +985,14 @@ function broadcast(state) {
 function sendState() {
   const visitInput = document.getElementById('visitantesInput');
   const visitNum = visitInput ? parseInt(visitInput.value, 10) : NaN;
-  const state = activeIndex === -1 ? { mode: 'idle' visitantes: visitantesActive && !isNaN(visitNum) ? visitNum : null } : {
+  const state = activeIndex === -1 ? { mode: 'idle', visitantes: visitantesActive && !isNaN(visitNum) ? visitNum : null } : {
     mode: paused ? 'paused' : (secondsLeft < 0 ? 'overtime' : 'active'),
     name: liturgy[activeIndex]?.name || '',
     secondsLeft,
     totalSeconds: liturgy[activeIndex]?.minutes * 60 || 0,
     elapsed: elapsedSeconds,
     activeIndex,
-    totalSteps: liturgy.length
+    totalSteps: liturgy.length,
     visitantes: visitantesActive && !isNaN(visitNum) ? visitNum : null,
   };
   broadcast(state);
@@ -1110,7 +1110,7 @@ function renderList() {
     const playBtn = document.createElement('button');
     playBtn.className = 'item-btn play';
     playBtn.title = 'Iniciar esta etapa';
-    playBtn.innerHTML = '▖';
+    playBtn.innerHTML = '▶';
     playBtn.addEventListener('click', () => startStep(i));
     actions.appendChild(playBtn);
 
